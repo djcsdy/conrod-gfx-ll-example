@@ -7,6 +7,8 @@ extern crate gfx_backend_vulkan as gfx_backend;
 extern crate gfx_hal;
 extern crate winit;
 
+use gfx_hal::device::Device;
+use gfx_hal::pool::CommandPoolCreateFlags;
 use gfx_hal::queue::capability::Graphics;
 use gfx_hal::queue::capability::Transfer;
 use gfx_hal::queue::family::QueueFamily;
@@ -69,7 +71,18 @@ fn main() {
         ])
         .unwrap();
 
-    let transfer_queue_group = queues.take::<Transfer>(transfer_queue_family.id());
+    let transfer_queue_group = queues.take::<Transfer>(transfer_queue_family.id()).unwrap();
 
-    let presentation_queue_group = queues.take::<Graphics>(presentation_queue_family.id());
+    let presentation_queue_group = queues
+        .take::<Graphics>(presentation_queue_family.id())
+        .unwrap();
+
+    let mut transfer_command_pool =
+        device.create_command_pool_typed(&transfer_queue_group, CommandPoolCreateFlags::empty(), 1);
+
+    let mut presentation_command_pool = device.create_command_pool_typed(
+        &presentation_queue_group,
+        CommandPoolCreateFlags::empty(),
+        1,
+    );
 }
