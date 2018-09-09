@@ -7,6 +7,8 @@ extern crate gfx_backend_vulkan as gfx_backend;
 extern crate gfx_hal;
 extern crate winit;
 
+use gfx_hal::Instance;
+
 fn main() {
     let mut events_loop = winit::EventsLoop::new();
 
@@ -25,4 +27,18 @@ fn main() {
     let instance = gfx_backend::Instance::create("conrod gfx-ll example", 0);
 
     let mut surface = instance.create_surface(&window);
+
+    let mut adapter = {
+        let mut adapters = instance.enumerate_adapters();
+
+        adapters.sort_by_key(|adapter| match adapter.info.device_type {
+            gfx_hal::adapter::DeviceType::IntegratedGpu => 0,
+            gfx_hal::adapter::DeviceType::DiscreteGpu => 1,
+            gfx_hal::adapter::DeviceType::VirtualGpu => 2,
+            gfx_hal::adapter::DeviceType::Cpu => 3,
+            gfx_hal::adapter::DeviceType::Other => 4,
+        });
+
+        adapters.remove(0)
+    };
 }
