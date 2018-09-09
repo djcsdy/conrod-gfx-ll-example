@@ -9,6 +9,7 @@ extern crate winit;
 
 use gfx_hal::queue::family::QueueFamily;
 use gfx_hal::queue::QueueType;
+use gfx_hal::Gpu;
 use gfx_hal::Instance;
 use gfx_hal::PhysicalDevice;
 use gfx_hal::Surface;
@@ -57,4 +58,12 @@ fn main() {
         .iter()
         .find(|family| family.queue_type() == QueueType::Transfer)
         .unwrap_or(presentation_queue_family);
+
+    let Gpu { device, queues } = adapter
+        .physical_device
+        .open(&[
+            (&transfer_queue_family, &[1.0]),
+            (&presentation_queue_family, &[1.0]),
+        ])
+        .unwrap();
 }
