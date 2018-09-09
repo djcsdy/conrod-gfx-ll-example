@@ -21,4 +21,8 @@ fn main() {
         .with_title("Conrod gfx-ll example")
         .build(&events_loop)
         .unwrap();
+
+    let instance = gfx_backend::Instance::create("conrod gfx-ll example", 0);
+
+    let mut surface = instance.create_surface(&window);
 }
