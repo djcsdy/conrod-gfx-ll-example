@@ -7,7 +7,11 @@ extern crate gfx_backend_vulkan as gfx_backend;
 extern crate gfx_hal;
 extern crate winit;
 
+use gfx_hal::queue::family::QueueFamily;
+use gfx_hal::queue::QueueType;
 use gfx_hal::Instance;
+use gfx_hal::PhysicalDevice;
+use gfx_hal::Surface;
 
 fn main() {
     let mut events_loop = winit::EventsLoop::new();
@@ -41,4 +45,16 @@ fn main() {
 
         adapters.remove(0)
     };
+
+    let presentation_queue_family = adapter
+        .queue_families
+        .iter()
+        .find(|family| surface.supports_queue_family(family))
+        .unwrap();
+
+    let transfer_queue_family = adapter
+        .queue_families
+        .iter()
+        .find(|family| family.queue_type() == QueueType::Transfer)
+        .unwrap_or(presentation_queue_family);
 }
