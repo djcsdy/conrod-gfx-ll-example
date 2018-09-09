@@ -3,4 +3,20 @@ name = "conrod-gfx-ll-example"
 version = "0.0.0"
 authors = ["Daniel Cassidy <mail@danielcassidy.me.uk>"]
 
+[features]
+default = ["gfx-backend-dx12"]
+vulkan = ["gfx-backend-vulkan"]
+
 [dependencies]
+gfx-hal = { git = "https://github.com/gfx-rs/gfx.git", rev = "2632c44" }
+winit = "0.16.2"
+
+[target.'cfg(windows)'.dependencies]
+gfx-backend-dx12 = { git = "https://github.com/gfx-rs/gfx.git", rev = "2632c44", optional = true }
+gfx-backend-vulkan = { git = "https://github.com/gfx-rs/gfx.git", rev = "2632c44", optional = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+gfx-backend-metal = { git = "https://github.com/gfx-rs/gfx.git", rev = "2632c44" }
+
+[target.'cfg(not(any(windows, target_os = "macos")))'.dependencies]
+gfx-backend-vulkan = { git = "https://github.com/gfx-rs/gfx.git", rev = "2632c44" }
