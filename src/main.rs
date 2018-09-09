@@ -7,6 +7,8 @@ extern crate gfx_backend_vulkan as gfx_backend;
 extern crate gfx_hal;
 extern crate winit;
 
+use gfx_hal::queue::capability::Graphics;
+use gfx_hal::queue::capability::Transfer;
 use gfx_hal::queue::family::QueueFamily;
 use gfx_hal::queue::QueueType;
 use gfx_hal::Gpu;
@@ -59,11 +61,15 @@ fn main() {
         .find(|family| family.queue_type() == QueueType::Transfer)
         .unwrap_or(presentation_queue_family);
 
-    let Gpu { device, queues } = adapter
+    let Gpu { device, mut queues } = adapter
         .physical_device
         .open(&[
             (&transfer_queue_family, &[1.0]),
             (&presentation_queue_family, &[1.0]),
         ])
         .unwrap();
+
+    let transfer_queue_group = queues.take::<Transfer>(transfer_queue_family.id());
+
+    let presentation_queue_group = queues.take::<Graphics>(presentation_queue_family.id());
 }
