@@ -8,5 +8,17 @@ extern crate gfx_hal;
 extern crate winit;
 
 fn main() {
-    println!("Hello, world!");
+    let mut events_loop = winit::EventsLoop::new();
+
+    let window = winit::WindowBuilder::new()
+        .with_dimensions(winit::dpi::LogicalSize::from_physical(
+            winit::dpi::PhysicalSize {
+                width: 600.0,
+                height: 420.0,
+            },
+            1.0,
+        ))
+        .with_title("Conrod gfx-ll example")
+        .build(&events_loop)
+        .unwrap();
 }
