@@ -22,14 +22,17 @@ use gfx_hal::Instance;
 use gfx_hal::PhysicalDevice;
 use gfx_hal::Surface;
 
+const WIDTH: i32 = 600;
+const HEIGHT: i32 = 420;
+
 fn main() {
     let mut events_loop = winit::EventsLoop::new();
 
     let window = winit::WindowBuilder::new()
         .with_dimensions(winit::dpi::LogicalSize::from_physical(
             winit::dpi::PhysicalSize {
-                width: 600.0,
-                height: 420.0,
+                width: WIDTH as f64,
+                height: HEIGHT as f64,
             },
             1.0,
         ))
@@ -89,4 +92,8 @@ fn main() {
         CommandPoolCreateFlags::empty(),
         1,
     );
+
+    let mut ui = conrod::UiBuilder::new([WIDTH as f64, HEIGHT as f64])
+        .theme(theme::theme())
+        .build();
 }
