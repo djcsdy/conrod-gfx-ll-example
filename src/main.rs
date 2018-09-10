@@ -7,6 +7,8 @@ extern crate gfx_backend_vulkan as gfx_backend;
 extern crate gfx_hal;
 extern crate winit;
 
+mod renderer;
+
 use gfx_hal::device::Device;
 use gfx_hal::pool::CommandPoolCreateFlags;
 use gfx_hal::queue::capability::Graphics;
