@@ -10,6 +10,7 @@ extern crate rusttype;
 extern crate winit;
 
 mod renderer;
+mod state;
 mod theme;
 
 use gfx_hal::device::Device;
