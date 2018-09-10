@@ -1,3 +1,4 @@
+extern crate conrod;
 #[cfg(all(windows, not(feature = "vulkan")))]
 extern crate gfx_backend_dx12 as gfx_backend;
 #[cfg(target_os = "macos")]
@@ -8,6 +9,7 @@ extern crate gfx_hal;
 extern crate winit;
 
 mod renderer;
+mod theme;
 
 use gfx_hal::device::Device;
 use gfx_hal::pool::CommandPoolCreateFlags;
