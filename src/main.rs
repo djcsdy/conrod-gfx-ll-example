@@ -110,4 +110,6 @@ fn main() {
     // TODO: Load a real image instead of an empty placeholder value.
     let mut image_map = conrod::image::Map::<()>::new();
     let rust_logo = image_map.insert(());
+
+    let mut app = state::DemoApp::new(rust_logo);
 }
