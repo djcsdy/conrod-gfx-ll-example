@@ -6,6 +6,7 @@ extern crate gfx_backend_metal as gfx_backend;
 #[cfg(any(all(not(windows), not(target_os = "macos")), all(windows, feature = "vulkan")))]
 extern crate gfx_backend_vulkan as gfx_backend;
 extern crate gfx_hal;
+extern crate rusttype;
 extern crate winit;
 
 mod renderer;
@@ -21,6 +22,7 @@ use gfx_hal::Gpu;
 use gfx_hal::Instance;
 use gfx_hal::PhysicalDevice;
 use gfx_hal::Surface;
+use rusttype::FontCollection;
 
 const WIDTH: i32 = 600;
 const HEIGHT: i32 = 420;
@@ -96,4 +98,11 @@ fn main() {
     let mut ui = conrod::UiBuilder::new([WIDTH as f64, HEIGHT as f64])
         .theme(theme::theme())
         .build();
+
+    FontCollection::from_bytes(include_bytes!("NotoSans-Regular.ttf") as &[u8])
+        .unwrap()
+        .into_fonts()
+        .for_each(|font| {
+            ui.fonts.insert(font.unwrap());
+        });
 }

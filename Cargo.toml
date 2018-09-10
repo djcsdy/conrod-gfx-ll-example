@@ -10,6 +10,7 @@ vulkan = ["gfx-backend-vulkan"]
 [dependencies]
 conrod = "0.61.1"
 gfx-hal = { git = "https://github.com/gfx-rs/gfx.git", rev = "2632c44" }
+rusttype = "0.5"
 winit = "0.17.2"
 
 [target.'cfg(windows)'.dependencies]
