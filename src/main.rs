@@ -106,4 +106,8 @@ fn main() {
         .for_each(|font| {
             ui.fonts.insert(font.unwrap());
         });
+
+    // TODO: Load a real image instead of an empty placeholder value.
+    let mut image_map = conrod::image::Map::<()>::new();
+    let rust_logo = image_map.insert(());
 }
