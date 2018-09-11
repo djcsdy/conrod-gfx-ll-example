@@ -24,28 +24,47 @@ use gfx_hal::Instance;
 use gfx_hal::PhysicalDevice;
 use gfx_hal::Surface;
 use rusttype::FontCollection;
+use std::sync::mpsc::channel;
+use std::thread;
 
 const WIDTH: i32 = 600;
 const HEIGHT: i32 = 420;
 
 fn main() {
-    let mut events_loop = winit::EventsLoop::new();
+    let (window_thread, (instance, mut surface)) = {
+        let instance = gfx_backend::Instance::create("conrod gfx-ll example", 0);
+        let (sender, receiver) = channel();
 
-    let window = winit::WindowBuilder::new()
-        .with_dimensions(winit::dpi::LogicalSize::from_physical(
-            winit::dpi::PhysicalSize {
-                width: WIDTH as f64,
-                height: HEIGHT as f64,
-            },
-            1.0,
-        ))
-        .with_title("Conrod gfx-ll example")
-        .build(&events_loop)
-        .unwrap();
+        let window_thread = thread::spawn(move || {
+            let mut events_loop = winit::EventsLoop::new();
 
-    let instance = gfx_backend::Instance::create("conrod gfx-ll example", 0);
+            let window = winit::WindowBuilder::new()
+                .with_dimensions(winit::dpi::LogicalSize::from_physical(
+                    winit::dpi::PhysicalSize {
+                        width: WIDTH as f64,
+                        height: HEIGHT as f64,
+                    },
+                    1.0,
+                ))
+                .with_title("Conrod gfx-ll example")
+                .build(&events_loop)
+                .unwrap();
 
-    let mut surface = instance.create_surface(&window);
+            let surface = instance.create_surface(&window);
+
+            sender.send((instance, surface)).unwrap();
+
+            events_loop.run_forever(|event| match event {
+                winit::Event::WindowEvent {
+                    event: winit::WindowEvent::CloseRequested,
+                    ..
+                } => winit::ControlFlow::Break,
+                _ => winit::ControlFlow::Continue,
+            });
+        });
+
+        (window_thread, receiver.recv().unwrap())
+    };
 
     let mut adapter = {
         let mut adapters = instance.enumerate_adapters();
@@ -112,4 +131,6 @@ fn main() {
     let rust_logo = image_map.insert(());
 
     let mut app = state::DemoApp::new(rust_logo);
+
+    window_thread.join().unwrap();
 }
