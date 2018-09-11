@@ -69,7 +69,7 @@ fn main() {
                     if let Some(conrod_event) =
                         conrod::backend::winit::convert_event(event, &window)
                     {
-                        events_sender.send(conrod_event);
+                        events_sender.send(conrod_event).unwrap();
                     }
                     winit::ControlFlow::Continue
                 }
@@ -150,7 +150,19 @@ fn main() {
 
     let ids = gui::Ids::new(ui.widget_id_generator());
 
-    gui::render(&mut ui.set_widgets(), &ids, &mut state);
+    'main: loop {
+        gui::render(&mut ui.set_widgets(), &ids, &mut state);
+
+        let mut event_option = match events_receiver.recv() {
+            Result::Ok(event) => Some(event),
+            Result::Err(_) => break 'main,
+        };
+
+        while let Some(event) = event_option {
+            ui.handle_event(event);
+            event_option = events_receiver.try_recv().ok();
+        }
+    }
 
     window_thread.join().unwrap();
 }
