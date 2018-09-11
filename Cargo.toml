@@ -8,7 +8,7 @@ default = ["gfx-backend-dx12"]
 vulkan = ["gfx-backend-vulkan"]
 
 [dependencies]
-conrod = "0.61.1"
+conrod = { version = "0.61.1", features = ["winit"] }
 gfx-hal = { git = "https://github.com/gfx-rs/gfx.git", rev = "2632c44" }
 rusttype = "0.5"
 winit = "0.17.2"
@@ -22,3 +22,6 @@ gfx-backend-metal = { git = "https://github.com/gfx-rs/gfx.git", rev = "2632c44"
 
 [target.'cfg(not(any(windows, target_os = "macos")))'.dependencies]
 gfx-backend-vulkan = { git = "https://github.com/gfx-rs/gfx.git", rev = "2632c44" }
+
+[patch.crates-io]
+conrod = { git = "https://github.com/djcsdy/conrod.git", rev = "cdfaa1a" }

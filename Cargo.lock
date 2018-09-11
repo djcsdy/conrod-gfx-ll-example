@@ -107,7 +107,7 @@ dependencies = [
 [[package]]
 name = "conrod"
 version = "0.61.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+source = "git+https://github.com/djcsdy/conrod.git?rev=cdfaa1a#cdfaa1ae5a76103ce3ab0c933944f0d23f91b4df"
 dependencies = [
  "conrod_derive 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "daggy 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -115,13 +115,14 @@ dependencies = [
  "num 0.1.42 (registry+https://github.com/rust-lang/crates.io-index)",
  "pistoncore-input 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rusttype 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "winit 0.17.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "conrod-gfx-ll-example"
 version = "0.0.0"
 dependencies = [
- "conrod 0.61.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "conrod 0.61.1 (git+https://github.com/djcsdy/conrod.git?rev=cdfaa1a)",
  "gfx-backend-dx12 0.1.0 (git+https://github.com/gfx-rs/gfx.git?rev=2632c44)",
  "gfx-backend-metal 0.1.0 (git+https://github.com/gfx-rs/gfx.git?rev=2632c44)",
  "gfx-backend-vulkan 0.1.0 (git+https://github.com/gfx-rs/gfx.git?rev=2632c44)",
@@ -1046,7 +1047,7 @@ dependencies = [
 "checksum cloudabi 0.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "ddfc5b9aa5d4507acaf872de71051dfd0e309860e88966e1051e462a077aac4f"
 "checksum cocoa 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f5cd1afb83b2de9c41e5dfedb2bcccb779d433b958404876009ae4b01746ff23"
 "checksum cocoa 0.18.0 (registry+https://github.com/rust-lang/crates.io-index)" = "53a840785348e998a1433d1f9d0b350fd83e91711fae8507c76ce510afc77e72"
-"checksum conrod 0.61.1 (registry+https://github.com/rust-lang/crates.io-index)" = "d4cd54996c99c3dac7e1f4ad1781979509639a43cdeca107036f3de526a534cd"
+"checksum conrod 0.61.1 (git+https://github.com/djcsdy/conrod.git?rev=cdfaa1a)" = "<none>"
 "checksum conrod_derive 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "53b7c11bc6fb4e9ef60cb6caf5dd304ca451946e0f951d82deaabd5b7460ce87"
 "checksum core-foundation 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)" = "cc3532ec724375c7cb7ff0a097b714fde180bb1f6ed2ab27cfcd99ffca873cd2"
 "checksum core-foundation-sys 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)" = "a3fb15cdbdd9cf8b82d97d0296bb5cd3631bba58d6e31650a002a8e7fb5721f9"

@@ -31,9 +31,11 @@ const WIDTH: i32 = 600;
 const HEIGHT: i32 = 420;
 
 fn main() {
+    let (events_sender, events_receiver) = channel();
+
     let (window_thread, (instance, mut surface)) = {
         let instance = gfx_backend::Instance::create("conrod gfx-ll example", 0);
-        let (sender, receiver) = channel();
+        let (window_instance_surface_sender, window_instance_surface_receiver) = channel();
 
         let window_thread = thread::spawn(move || {
             let mut events_loop = winit::EventsLoop::new();
@@ -52,18 +54,30 @@ fn main() {
 
             let surface = instance.create_surface(&window);
 
-            sender.send((instance, surface)).unwrap();
+            window_instance_surface_sender
+                .send((instance, surface))
+                .unwrap();
 
             events_loop.run_forever(|event| match event {
                 winit::Event::WindowEvent {
                     event: winit::WindowEvent::CloseRequested,
                     ..
                 } => winit::ControlFlow::Break,
-                _ => winit::ControlFlow::Continue,
+                event => {
+                    if let Some(conrod_event) =
+                        conrod::backend::winit::convert_event(event, &window)
+                    {
+                        events_sender.send(conrod_event);
+                    }
+                    winit::ControlFlow::Continue
+                }
             });
         });
 
-        (window_thread, receiver.recv().unwrap())
+        (
+            window_thread,
+            window_instance_surface_receiver.recv().unwrap(),
+        )
     };
 
     let mut adapter = {
