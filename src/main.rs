@@ -7,6 +7,7 @@ extern crate gfx_backend_metal as gfx_backend;
 #[cfg(any(all(not(windows), not(target_os = "macos")), all(windows, feature = "vulkan")))]
 extern crate gfx_backend_vulkan as gfx_backend;
 extern crate gfx_hal;
+extern crate rand;
 extern crate rusttype;
 extern crate winit;
 
@@ -148,6 +149,8 @@ fn main() {
     let mut state = gui::State::new(rust_logo);
 
     let ids = gui::Ids::new(ui.widget_id_generator());
+
+    gui::render(&mut ui.set_widgets(), &ids, &mut state);
 
     window_thread.join().unwrap();
 }
