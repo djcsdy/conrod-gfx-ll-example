@@ -1,3 +1,4 @@
+#[macro_use]
 extern crate conrod;
 #[cfg(all(windows, not(feature = "vulkan")))]
 extern crate gfx_backend_dx12 as gfx_backend;
@@ -9,8 +10,8 @@ extern crate gfx_hal;
 extern crate rusttype;
 extern crate winit;
 
+mod gui;
 mod renderer;
-mod state;
 mod theme;
 
 use gfx_hal::device::Device;
@@ -144,7 +145,9 @@ fn main() {
     let mut image_map = conrod::image::Map::<()>::new();
     let rust_logo = image_map.insert(());
 
-    let mut app = state::DemoApp::new(rust_logo);
+    let mut state = gui::State::new(rust_logo);
+
+    let ids = gui::Ids::new(ui.widget_id_generator());
 
     window_thread.join().unwrap();
 }
