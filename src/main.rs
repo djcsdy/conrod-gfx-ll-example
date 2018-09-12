@@ -16,6 +16,8 @@ mod renderer;
 mod theme;
 
 use gfx_hal::device::Device;
+use gfx_hal::format::ChannelType;
+use gfx_hal::format::Format;
 use gfx_hal::pool::CommandPoolCreateFlags;
 use gfx_hal::queue::capability::Graphics;
 use gfx_hal::queue::capability::Transfer;
@@ -95,6 +97,19 @@ fn main() {
 
         adapters.remove(0)
     };
+
+    let (surface_capabilities, surface_formats, present_modes) =
+        surface.compatibility(&adapter.physical_device);
+
+    let surface_format = surface_formats
+        .map(|formats| {
+            formats
+                .iter()
+                .find(|format| format.base_format().1 == ChannelType::Srgb)
+                .map(|format| *format)
+                .unwrap_or(formats[0])
+        })
+        .unwrap_or(Format::Rgb8Srgb);
 
     let presentation_queue_family = adapter
         .queue_families
