@@ -127,13 +127,6 @@ fn main() {
 
     let present_mode = present_modes[0];
 
-    build_swapchain(
-        &*window.upgrade().unwrap(),
-        &adapter.physical_device,
-        &surface,
-        surface_format,
-    );
-
     let presentation_queue_family = adapter
         .queue_families
         .iter()
@@ -153,6 +146,14 @@ fn main() {
             (&presentation_queue_family, &[1.0]),
         ])
         .unwrap();
+
+    let mut swapchain = build_swapchain::<gfx_backend::Backend>(
+        &*window.upgrade().unwrap(),
+        &adapter.physical_device,
+        &device,
+        &mut surface,
+        surface_format,
+    );
 
     let transfer_queue_group = queues.take::<Transfer>(transfer_queue_family.id()).unwrap();
 
@@ -205,15 +206,13 @@ fn main() {
     window_thread.join().unwrap();
 }
 
-fn build_swapchain<B, S>(
+fn build_swapchain<B: Backend>(
     window: &winit::Window,
     physical_device: &<B as gfx_hal::Backend>::PhysicalDevice,
-    surface: &S,
+    device: &<B as gfx_hal::Backend>::Device,
+    surface: &mut <B as gfx_hal::Backend>::Surface,
     surface_format: Format,
-) where
-    B: Backend,
-    S: Surface<B>,
-{
+) -> <B as gfx_hal::Backend>::Swapchain {
     let (capabilities, _, _) = surface.compatibility(physical_device);
 
     let extent = match capabilities.current_extent {
@@ -244,4 +243,6 @@ fn build_swapchain<B, S>(
 
     let config = SwapchainConfig::new(extent.width, extent.height, surface_format, image_count)
         .with_image_usage(Usage::TRANSFER_DST);
+
+    device.create_swapchain(surface, config, None).0
 }
