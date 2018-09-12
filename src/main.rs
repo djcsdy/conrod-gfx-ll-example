@@ -23,13 +23,17 @@ use gfx_hal::queue::capability::Graphics;
 use gfx_hal::queue::capability::Transfer;
 use gfx_hal::queue::family::QueueFamily;
 use gfx_hal::queue::QueueType;
+use gfx_hal::window::Extent2D;
 use gfx_hal::window::PresentMode;
+use gfx_hal::window::SurfaceCapabilities;
+use gfx_hal::Backend;
 use gfx_hal::Gpu;
 use gfx_hal::Instance;
 use gfx_hal::PhysicalDevice;
 use gfx_hal::Surface;
 use rusttype::FontCollection;
 use std::sync::mpsc::channel;
+use std::sync::Arc;
 use std::thread;
 
 const WIDTH: i32 = 600;
@@ -38,7 +42,7 @@ const HEIGHT: i32 = 420;
 fn main() {
     let (events_sender, events_receiver) = channel();
 
-    let (window_thread, (instance, mut surface)) = {
+    let (window_thread, (window, instance, mut surface)) = {
         let instance = gfx_backend::Instance::create("conrod gfx-ll example", 0);
         let (window_instance_surface_sender, window_instance_surface_receiver) = channel();
 
@@ -55,12 +59,13 @@ fn main() {
                 ))
                 .with_title("Conrod gfx-ll example")
                 .build(&events_loop)
+                .map(Arc::new)
                 .unwrap();
 
             let surface = instance.create_surface(&window);
 
             window_instance_surface_sender
-                .send((instance, surface))
+                .send((Arc::downgrade(&window), instance, surface))
                 .unwrap();
 
             events_loop.run_forever(|event| match event {
@@ -70,7 +75,7 @@ fn main() {
                 } => winit::ControlFlow::Break,
                 event => {
                     if let Some(conrod_event) =
-                        conrod::backend::winit::convert_event(event, &window)
+                        conrod::backend::winit::convert_event(event, &*window)
                     {
                         events_sender.send(conrod_event).unwrap();
                     }
@@ -120,6 +125,8 @@ fn main() {
     });
 
     let present_mode = present_modes[0];
+
+    build_swapchain(&*window.upgrade().unwrap(), &surface, &surface_capabilities);
 
     let presentation_queue_family = adapter
         .queue_families
@@ -190,4 +197,36 @@ fn main() {
     }
 
     window_thread.join().unwrap();
+}
+
+fn build_swapchain<B, S>(
+    window: &winit::Window,
+    surface: &S,
+    surface_capabilities: &SurfaceCapabilities,
+) where
+    B: Backend,
+    S: Surface<B>,
+{
+    let extent = match surface_capabilities.current_extent {
+        Some(extent) => extent,
+        None => {
+            let window_size = window
+                .get_inner_size()
+                .unwrap()
+                .to_physical(window.get_hidpi_factor());
+            let mut extent = Extent2D {
+                width: window_size.width as _,
+                height: window_size.height as _,
+            };
+            extent.width = extent
+                .width
+                .max(surface_capabilities.extents.start.width)
+                .min(surface_capabilities.extents.end.width);
+            extent.height = extent
+                .height
+                .max(surface_capabilities.extents.start.height)
+                .min(surface_capabilities.extents.end.height);
+            extent
+        }
+    };
 }
