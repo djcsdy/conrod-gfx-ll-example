@@ -18,6 +18,7 @@ mod theme;
 use gfx_hal::device::Device;
 use gfx_hal::format::ChannelType;
 use gfx_hal::format::Format;
+use gfx_hal::image::Usage;
 use gfx_hal::pool::CommandPoolCreateFlags;
 use gfx_hal::queue::capability::Graphics;
 use gfx_hal::queue::capability::Transfer;
@@ -26,6 +27,7 @@ use gfx_hal::queue::QueueType;
 use gfx_hal::window::Extent2D;
 use gfx_hal::window::PresentMode;
 use gfx_hal::window::SurfaceCapabilities;
+use gfx_hal::window::SwapchainConfig;
 use gfx_hal::Backend;
 use gfx_hal::Gpu;
 use gfx_hal::Instance;
@@ -126,7 +128,7 @@ fn main() {
 
     let present_mode = present_modes[0];
 
-    build_swapchain(&*window.upgrade().unwrap(), &surface, &surface_capabilities);
+    build_swapchain(&*window.upgrade().unwrap(), &surface, surface_format, &surface_capabilities);
 
     let presentation_queue_family = adapter
         .queue_families
@@ -202,6 +204,7 @@ fn main() {
 fn build_swapchain<B, S>(
     window: &winit::Window,
     surface: &S,
+    surface_format: Format,
     surface_capabilities: &SurfaceCapabilities,
 ) where
     B: Backend,
@@ -229,4 +232,10 @@ fn build_swapchain<B, S>(
             extent
         }
     };
+
+    let image_count = 2.max(surface_capabilities.image_count.start)
+        .min(surface_capabilities.image_count.end);
+
+    let config = SwapchainConfig::new(extent.width, extent.height, surface_format, image_count)
+        .with_image_usage(Usage::TRANSFER_DST);
 }
