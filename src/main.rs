@@ -26,7 +26,6 @@ use gfx_hal::queue::family::QueueFamily;
 use gfx_hal::queue::QueueType;
 use gfx_hal::window::Extent2D;
 use gfx_hal::window::PresentMode;
-use gfx_hal::window::SurfaceCapabilities;
 use gfx_hal::window::SwapchainConfig;
 use gfx_hal::Backend;
 use gfx_hal::Gpu;
@@ -128,7 +127,12 @@ fn main() {
 
     let present_mode = present_modes[0];
 
-    build_swapchain(&*window.upgrade().unwrap(), &surface, surface_format, &surface_capabilities);
+    build_swapchain(
+        &*window.upgrade().unwrap(),
+        &adapter.physical_device,
+        &surface,
+        surface_format,
+    );
 
     let presentation_queue_family = adapter
         .queue_families
@@ -203,14 +207,16 @@ fn main() {
 
 fn build_swapchain<B, S>(
     window: &winit::Window,
+    physical_device: &<B as gfx_hal::Backend>::PhysicalDevice,
     surface: &S,
     surface_format: Format,
-    surface_capabilities: &SurfaceCapabilities,
 ) where
     B: Backend,
     S: Surface<B>,
 {
-    let extent = match surface_capabilities.current_extent {
+    let (capabilities, _, _) = surface.compatibility(physical_device);
+
+    let extent = match capabilities.current_extent {
         Some(extent) => extent,
         None => {
             let window_size = window
@@ -223,18 +229,18 @@ fn build_swapchain<B, S>(
             };
             extent.width = extent
                 .width
-                .max(surface_capabilities.extents.start.width)
-                .min(surface_capabilities.extents.end.width);
+                .max(capabilities.extents.start.width)
+                .min(capabilities.extents.end.width);
             extent.height = extent
                 .height
-                .max(surface_capabilities.extents.start.height)
-                .min(surface_capabilities.extents.end.height);
+                .max(capabilities.extents.start.height)
+                .min(capabilities.extents.end.height);
             extent
         }
     };
 
-    let image_count = 2.max(surface_capabilities.image_count.start)
-        .min(surface_capabilities.image_count.end);
+    let image_count = 2.max(capabilities.image_count.start)
+        .min(capabilities.image_count.end);
 
     let config = SwapchainConfig::new(extent.width, extent.height, surface_format, image_count)
         .with_image_usage(Usage::TRANSFER_DST);
