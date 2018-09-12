@@ -23,6 +23,7 @@ use gfx_hal::queue::capability::Graphics;
 use gfx_hal::queue::capability::Transfer;
 use gfx_hal::queue::family::QueueFamily;
 use gfx_hal::queue::QueueType;
+use gfx_hal::window::PresentMode;
 use gfx_hal::Gpu;
 use gfx_hal::Instance;
 use gfx_hal::PhysicalDevice;
@@ -98,7 +99,7 @@ fn main() {
         adapters.remove(0)
     };
 
-    let (surface_capabilities, surface_formats, present_modes) =
+    let (surface_capabilities, surface_formats, mut present_modes) =
         surface.compatibility(&adapter.physical_device);
 
     let surface_format = surface_formats
@@ -110,6 +111,15 @@ fn main() {
                 .unwrap_or(formats[0])
         })
         .unwrap_or(Format::Rgb8Srgb);
+
+    present_modes.sort_by_key(|mode| match mode {
+        PresentMode::Mailbox => 0,
+        PresentMode::Relaxed => 1,
+        PresentMode::Fifo => 2,
+        PresentMode::Immediate => 3,
+    });
+
+    let present_mode = present_modes[0];
 
     let presentation_queue_family = adapter
         .queue_families
