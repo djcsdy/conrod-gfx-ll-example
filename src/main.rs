@@ -24,8 +24,11 @@ use gfx_hal::queue::capability::Graphics;
 use gfx_hal::queue::capability::Transfer;
 use gfx_hal::queue::family::QueueFamily;
 use gfx_hal::queue::QueueType;
+use gfx_hal::window::AcquireError;
 use gfx_hal::window::Extent2D;
+use gfx_hal::window::FrameSync;
 use gfx_hal::window::PresentMode;
+use gfx_hal::window::Swapchain;
 use gfx_hal::window::SwapchainConfig;
 use gfx_hal::Backend;
 use gfx_hal::Gpu;
@@ -157,7 +160,7 @@ fn main() {
 
     let transfer_queue_group = queues.take::<Transfer>(transfer_queue_family.id()).unwrap();
 
-    let presentation_queue_group = queues
+    let mut presentation_queue_group = queues
         .take::<Graphics>(presentation_queue_family.id())
         .unwrap();
 
@@ -189,8 +192,23 @@ fn main() {
 
     let ids = gui::Ids::new(ui.widget_id_generator());
 
+    let frame_semaphore = device.create_semaphore();
+
     'main: loop {
         gui::render(&mut ui.set_widgets(), &ids, &mut state);
+
+        match swapchain.acquire_image(4000, FrameSync::Semaphore(&frame_semaphore)) {
+            Ok(swapchain_image_index) => {
+                presentation_queue_group.queues[0]
+                    .present(
+                        vec![(&swapchain, swapchain_image_index)],
+                        vec![&frame_semaphore],
+                    )
+                    .unwrap();
+            }
+            Err(AcquireError::NotReady) => (),
+            Err(error) => panic!(error),
+        }
 
         let mut event_option = match events_receiver.recv() {
             Result::Ok(event) => Some(event),
@@ -202,6 +220,8 @@ fn main() {
             event_option = events_receiver.try_recv().ok();
         }
     }
+
+    device.destroy_semaphore(frame_semaphore);
 
     window_thread.join().unwrap();
 }
