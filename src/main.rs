@@ -21,9 +21,7 @@ use gfx_hal::format::Format;
 use gfx_hal::image::Usage;
 use gfx_hal::pool::CommandPoolCreateFlags;
 use gfx_hal::queue::capability::Graphics;
-use gfx_hal::queue::capability::Transfer;
 use gfx_hal::queue::family::QueueFamily;
-use gfx_hal::queue::QueueType;
 use gfx_hal::window::AcquireError;
 use gfx_hal::window::Extent2D;
 use gfx_hal::window::FrameSync;
@@ -130,24 +128,15 @@ fn main() {
 
     let present_mode = present_modes[0];
 
-    let presentation_queue_family = adapter
+    let graphics_queue_family = adapter
         .queue_families
         .iter()
         .find(|family| surface.supports_queue_family(family))
         .unwrap();
 
-    let transfer_queue_family = adapter
-        .queue_families
-        .iter()
-        .find(|family| family.queue_type() == QueueType::Transfer)
-        .unwrap_or(presentation_queue_family);
-
     let Gpu { device, mut queues } = adapter
         .physical_device
-        .open(&[
-            (&transfer_queue_family, &[1.0]),
-            (&presentation_queue_family, &[1.0]),
-        ])
+        .open(&[(&graphics_queue_family, &[1.0])])
         .unwrap();
 
     let mut swapchain = build_swapchain::<gfx_backend::Backend>(
@@ -158,20 +147,10 @@ fn main() {
         surface_format,
     );
 
-    let transfer_queue_group = queues.take::<Transfer>(transfer_queue_family.id()).unwrap();
+    let mut graphics_queue_group = queues.take::<Graphics>(graphics_queue_family.id()).unwrap();
 
-    let mut presentation_queue_group = queues
-        .take::<Graphics>(presentation_queue_family.id())
-        .unwrap();
-
-    let mut transfer_command_pool =
-        device.create_command_pool_typed(&transfer_queue_group, CommandPoolCreateFlags::empty(), 1);
-
-    let mut presentation_command_pool = device.create_command_pool_typed(
-        &presentation_queue_group,
-        CommandPoolCreateFlags::empty(),
-        1,
-    );
+    let mut graphics_command_pool =
+        device.create_command_pool_typed(&graphics_queue_group, CommandPoolCreateFlags::empty(), 1);
 
     let mut ui = conrod::UiBuilder::new([WIDTH as f64, HEIGHT as f64])
         .theme(theme::theme())
@@ -199,7 +178,7 @@ fn main() {
 
         if let Some(primitives) = ui.draw_if_changed() {
             match swapchain.acquire_image(4000, FrameSync::Semaphore(&frame_semaphore)) {
-                Ok(swapchain_image_index) => presentation_queue_group.queues[0].present(
+                Ok(swapchain_image_index) => graphics_queue_group.queues[0].present(
                     vec![(&swapchain, swapchain_image_index)],
                     vec![&frame_semaphore],
                 ),
