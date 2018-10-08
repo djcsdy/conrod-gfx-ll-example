@@ -145,6 +145,7 @@ fn main() {
         &device,
         &mut surface,
         surface_format,
+        present_mode,
     );
 
     let mut graphics_queue_group = queues.take::<Graphics>(graphics_queue_family.id()).unwrap();
@@ -191,6 +192,7 @@ fn main() {
                     &device,
                     &mut surface,
                     surface_format,
+                    present_mode,
                 );
             });
         }
@@ -217,6 +219,7 @@ fn build_swapchain<B: Backend>(
     device: &<B as gfx_hal::Backend>::Device,
     surface: &mut <B as gfx_hal::Backend>::Surface,
     surface_format: Format,
+    present_mode: PresentMode,
 ) -> <B as gfx_hal::Backend>::Swapchain {
     let (capabilities, _, _) = surface.compatibility(physical_device);
 
@@ -247,7 +250,8 @@ fn build_swapchain<B: Backend>(
         .min(capabilities.image_count.end);
 
     let config = SwapchainConfig::new(extent.width, extent.height, surface_format, image_count)
-        .with_image_usage(Usage::TRANSFER_DST);
+        .with_image_usage(Usage::TRANSFER_DST)
+        .with_mode(present_mode);
 
     device.create_swapchain(surface, config, None).0
 }
