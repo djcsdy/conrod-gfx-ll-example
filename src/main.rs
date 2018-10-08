@@ -197,22 +197,24 @@ fn main() {
     'main: loop {
         gui::render(&mut ui.set_widgets(), &ids, &mut state);
 
-        match swapchain.acquire_image(4000, FrameSync::Semaphore(&frame_semaphore)) {
-            Ok(swapchain_image_index) => presentation_queue_group.queues[0].present(
-                vec![(&swapchain, swapchain_image_index)],
-                vec![&frame_semaphore],
-            ),
-            Err(AcquireError::NotReady) => Ok(()),
-            Err(_) => Err(()),
-        }.unwrap_or_else(|_| {
-            swapchain = build_swapchain::<gfx_backend::Backend>(
-                &*window.upgrade().unwrap(),
-                &adapter.physical_device,
-                &device,
-                &mut surface,
-                surface_format,
-            );
-        });
+        if let Some(primitives) = ui.draw_if_changed() {
+            match swapchain.acquire_image(4000, FrameSync::Semaphore(&frame_semaphore)) {
+                Ok(swapchain_image_index) => presentation_queue_group.queues[0].present(
+                    vec![(&swapchain, swapchain_image_index)],
+                    vec![&frame_semaphore],
+                ),
+                Err(AcquireError::NotReady) => Ok(()),
+                Err(_) => Err(()),
+            }.unwrap_or_else(|_| {
+                swapchain = build_swapchain::<gfx_backend::Backend>(
+                    &*window.upgrade().unwrap(),
+                    &adapter.physical_device,
+                    &device,
+                    &mut surface,
+                    surface_format,
+                );
+            });
+        }
 
         let mut event_option = match events_receiver.recv() {
             Result::Ok(event) => Some(event),
