@@ -10,6 +10,8 @@ vulkan = ["gfx-backend-vulkan"]
 [dependencies]
 conrod = { version = "0.61.1", features = ["winit"] }
 gfx-hal = { git = "https://github.com/gfx-rs/gfx.git", rev = "2632c44" }
+glsl-to-spirv-macros = "0.1.1"
+glsl-to-spirv-macros-impl = "0.1.0"
 rand = "0.5.5"
 rusttype = "0.5"
 winit = "0.17.2"

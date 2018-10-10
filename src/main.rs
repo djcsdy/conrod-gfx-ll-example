@@ -7,6 +7,10 @@ extern crate gfx_backend_metal as gfx_backend;
 #[cfg(any(all(not(windows), not(target_os = "macos")), all(windows, feature = "vulkan")))]
 extern crate gfx_backend_vulkan as gfx_backend;
 extern crate gfx_hal;
+#[macro_use]
+extern crate glsl_to_spirv_macros;
+#[macro_use]
+extern crate glsl_to_spirv_macros_impl;
 extern crate rand;
 extern crate rusttype;
 extern crate winit;

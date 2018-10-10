@@ -6,6 +6,9 @@ use gfx_hal::pool::CommandPool;
 use gfx_hal::queue::capability::Graphics;
 use gfx_hal::Backend;
 
+static VERTEX_SHADER: &[u8] = include_glsl_vs!("src/conrod.vert");
+static FRAGMENT_SHADER: &[u8] = include_glsl_fs!("src/conrod.frag");
+
 pub fn render<B: Backend>(graphics_command_pool: &mut CommandPool<B, Graphics>) {
     let mut graphics_command_buffer =
         graphics_command_pool.acquire_command_buffer::<OneShot>(false);
