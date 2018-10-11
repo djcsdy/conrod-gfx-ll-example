@@ -247,7 +247,7 @@ fn build_render_pass<B: Backend>(
                 load: AttachmentLoadOp::DontCare,
                 store: AttachmentStoreOp::DontCare,
             },
-            layouts: Layout::General..Layout::General,
+            layouts: Layout::Undefined..Layout::General,
         }],
         vec![SubpassDesc {
             colors: &[(0, Layout::General)],
