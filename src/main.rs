@@ -206,6 +206,8 @@ fn main() {
                     surface_format,
                     present_mode,
                 );
+
+                ui.needs_redraw();
             };
         }
 
