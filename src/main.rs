@@ -22,10 +22,10 @@ mod theme;
 use gfx_hal::device::Device;
 use gfx_hal::format::ChannelType;
 use gfx_hal::format::Format;
-use gfx_hal::image::Usage;
-use gfx_hal::pass::Attachment;
-use gfx_hal::pass::SubpassDependency;
-use gfx_hal::pass::SubpassDesc;
+use gfx_hal::image::{Layout, Usage};
+use gfx_hal::pass::{
+    Attachment, AttachmentLoadOp, AttachmentOps, AttachmentStoreOp, SubpassDependency, SubpassDesc,
+};
 use gfx_hal::pool::CommandPoolCreateFlags;
 use gfx_hal::queue::capability::Graphics;
 use gfx_hal::queue::family::QueueFamily;
@@ -155,7 +155,7 @@ fn main() {
         present_mode,
     );
 
-    let mut render_pass = build_render_pass::<gfx_backend::Backend>(&device);
+    let mut render_pass = build_render_pass::<gfx_backend::Backend>(&device, surface_format);
 
     let mut graphics_queue_group = queues.take::<Graphics>(graphics_queue_family.id()).unwrap();
 
@@ -233,9 +233,22 @@ fn main() {
 
 fn build_render_pass<B: Backend>(
     device: &<B as gfx_hal::Backend>::Device,
+    surface_format: Format,
 ) -> <B as gfx_hal::Backend>::RenderPass {
     device.create_render_pass(
-        vec![] as Vec<Attachment>,
+        vec![Attachment {
+            format: Some(surface_format),
+            samples: 1,
+            ops: AttachmentOps {
+                load: AttachmentLoadOp::Clear,
+                store: AttachmentStoreOp::Store,
+            },
+            stencil_ops: AttachmentOps {
+                load: AttachmentLoadOp::DontCare,
+                store: AttachmentStoreOp::DontCare
+            },
+            layouts: Layout::General..Layout::General,
+        }],
         vec![] as Vec<SubpassDesc>,
         vec![] as Vec<SubpassDependency>,
     )
