@@ -23,6 +23,9 @@ use gfx_hal::device::Device;
 use gfx_hal::format::ChannelType;
 use gfx_hal::format::Format;
 use gfx_hal::image::Usage;
+use gfx_hal::pass::Attachment;
+use gfx_hal::pass::SubpassDependency;
+use gfx_hal::pass::SubpassDesc;
 use gfx_hal::pool::CommandPoolCreateFlags;
 use gfx_hal::queue::capability::Graphics;
 use gfx_hal::queue::family::QueueFamily;
@@ -152,6 +155,8 @@ fn main() {
         present_mode,
     );
 
+    let mut render_pass = build_render_pass::<gfx_backend::Backend>(&device);
+
     let mut graphics_queue_group = queues.take::<Graphics>(graphics_queue_family.id()).unwrap();
 
     let mut graphics_command_pool =
@@ -214,9 +219,21 @@ fn main() {
 
     device.destroy_semaphore(frame_semaphore);
 
+    device.destroy_render_pass(render_pass);
+
     device.destroy_swapchain(swapchain);
 
     window_thread.join().unwrap();
+}
+
+fn build_render_pass<B: Backend>(
+    device: &<B as gfx_hal::Backend>::Device,
+) -> <B as gfx_hal::Backend>::RenderPass {
+    device.create_render_pass(
+        vec![] as Vec<Attachment>,
+        vec![] as Vec<SubpassDesc>,
+        vec![] as Vec<SubpassDependency>,
+    )
 }
 
 fn build_swapchain<B: Backend>(
