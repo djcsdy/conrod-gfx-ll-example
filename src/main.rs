@@ -247,10 +247,10 @@ fn build_render_pass<B: Backend>(
                 load: AttachmentLoadOp::DontCare,
                 store: AttachmentStoreOp::DontCare,
             },
-            layouts: Layout::Undefined..Layout::General,
+            layouts: Layout::Undefined..Layout::ColorAttachmentOptimal,
         }],
         vec![SubpassDesc {
-            colors: &[(0, Layout::General)],
+            colors: &[(0, Layout::ColorAttachmentOptimal)],
             depth_stencil: None,
             inputs: &[],
             resolves: &[],
