@@ -214,6 +214,8 @@ fn main() {
 
     device.destroy_semaphore(frame_semaphore);
 
+    device.destroy_swapchain(swapchain);
+
     window_thread.join().unwrap();
 }
 
