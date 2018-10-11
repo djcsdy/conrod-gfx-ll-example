@@ -187,14 +187,17 @@ fn main() {
         gui::render(&mut ui.set_widgets(), &ids, &mut state);
 
         if let Some(primitives) = ui.draw_if_changed() {
-            match swapchain.acquire_image(4000, FrameSync::Semaphore(&frame_semaphore)) {
+            if match swapchain.acquire_image(4000, FrameSync::Semaphore(&frame_semaphore)) {
                 Ok(swapchain_image_index) => graphics_queue_group.queues[0].present(
                     vec![(&swapchain, swapchain_image_index)],
                     vec![&frame_semaphore],
                 ),
                 Err(AcquireError::NotReady) => Ok(()),
                 Err(_) => Err(()),
-            }.unwrap_or_else(|_| {
+            }.is_err()
+            {
+                device.destroy_swapchain(swapchain);
+
                 swapchain = build_swapchain::<gfx_backend::Backend>(
                     &*window.upgrade().unwrap(),
                     &adapter.physical_device,
@@ -203,7 +206,7 @@ fn main() {
                     surface_format,
                     present_mode,
                 );
-            });
+            };
         }
 
         let mut event_option = match events_receiver.recv() {
