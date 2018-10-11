@@ -245,11 +245,17 @@ fn build_render_pass<B: Backend>(
             },
             stencil_ops: AttachmentOps {
                 load: AttachmentLoadOp::DontCare,
-                store: AttachmentStoreOp::DontCare
+                store: AttachmentStoreOp::DontCare,
             },
             layouts: Layout::General..Layout::General,
         }],
-        vec![] as Vec<SubpassDesc>,
+        vec![SubpassDesc {
+            colors: &[(0, Layout::General)],
+            depth_stencil: None,
+            inputs: &[],
+            resolves: &[],
+            preserves: &[],
+        }],
         vec![] as Vec<SubpassDependency>,
     )
 }
