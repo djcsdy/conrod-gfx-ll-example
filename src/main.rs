@@ -270,11 +270,13 @@ fn build_framebuffer<B: Backend>(
         )
         .unwrap();
 
-    let attachments = vec![image_view];
+    let framebuffer = {
+        let attachments = vec![&image_view];
 
-    let framebuffer = device
+        device
         .create_framebuffer(render_pass, attachments, extent)
-        .unwrap();
+            .unwrap()
+    };
 
     (image_view, framebuffer)
 }
