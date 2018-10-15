@@ -20,9 +20,8 @@ mod renderer;
 mod theme;
 
 use gfx_hal::device::Device;
-use gfx_hal::format::ChannelType;
-use gfx_hal::format::Format;
-use gfx_hal::image::{Layout, Usage};
+use gfx_hal::format::{Aspects, ChannelType, Format, Swizzle};
+use gfx_hal::image::{Extent, Layout, SubresourceRange, Usage, ViewKind};
 use gfx_hal::pass::{
     Attachment, AttachmentLoadOp, AttachmentOps, AttachmentStoreOp, SubpassDependency, SubpassDesc,
 };
@@ -229,6 +228,34 @@ fn main() {
     device.destroy_swapchain(swapchain);
 
     window_thread.join().unwrap();
+}
+
+fn build_framebuffer<B: Backend>(
+    device: &<B as gfx_hal::Backend>::Device,
+    pass: &<B as gfx_hal::Backend>::RenderPass,
+    image: &<B as gfx_hal::Backend>::Image,
+    format: Format,
+    extent: Extent,
+) -> <B as gfx_hal::Backend>::Framebuffer {
+    let attachments = vec![
+        device
+            .create_image_view(
+                image,
+                ViewKind::D2,
+                format,
+                Swizzle::NO,
+                SubresourceRange {
+                    aspects: Aspects::COLOR,
+                    levels: 0..1,
+                    layers: 0..1,
+                },
+            )
+            .unwrap(),
+    ];
+
+    device
+        .create_framebuffer(pass, attachments, extent)
+        .unwrap()
 }
 
 fn build_render_pass<B: Backend>(
