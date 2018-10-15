@@ -28,12 +28,9 @@ use gfx_hal::pass::{
 use gfx_hal::pool::CommandPoolCreateFlags;
 use gfx_hal::queue::capability::Graphics;
 use gfx_hal::queue::family::QueueFamily;
-use gfx_hal::window::AcquireError;
-use gfx_hal::window::Extent2D;
-use gfx_hal::window::FrameSync;
-use gfx_hal::window::PresentMode;
-use gfx_hal::window::Swapchain;
-use gfx_hal::window::SwapchainConfig;
+use gfx_hal::window::{
+    AcquireError, Backbuffer, Extent2D, FrameSync, PresentMode, Swapchain, SwapchainConfig,
+};
 use gfx_hal::Backend;
 use gfx_hal::Gpu;
 use gfx_hal::Instance;
@@ -230,9 +227,25 @@ fn main() {
     window_thread.join().unwrap();
 }
 
+fn build_framebuffers<B: Backend>(
+    device: &<B as gfx_hal::Backend>::Device,
+    render_pass: &<B as gfx_hal::Backend>::RenderPass,
+    backbuffer: Backbuffer<B>,
+    format: Format,
+    extent: Extent,
+) -> Vec<<B as gfx_hal::Backend>::Framebuffer> {
+    match backbuffer {
+        Backbuffer::Images(images) => images
+            .into_iter()
+            .map(|image| build_framebuffer::<B>(device, render_pass, &image, format, extent))
+            .collect(),
+        Backbuffer::Framebuffer(framebuffer) => vec![framebuffer],
+    }
+}
+
 fn build_framebuffer<B: Backend>(
     device: &<B as gfx_hal::Backend>::Device,
-    pass: &<B as gfx_hal::Backend>::RenderPass,
+    render_pass: &<B as gfx_hal::Backend>::RenderPass,
     image: &<B as gfx_hal::Backend>::Image,
     format: Format,
     extent: Extent,
@@ -254,7 +267,7 @@ fn build_framebuffer<B: Backend>(
     ];
 
     device
-        .create_framebuffer(pass, attachments, extent)
+        .create_framebuffer(render_pass, attachments, extent)
         .unwrap()
 }
 
