@@ -233,13 +233,16 @@ fn build_framebuffers<B: Backend>(
     backbuffer: Backbuffer<B>,
     format: Format,
     extent: Extent,
-) -> Vec<<B as gfx_hal::Backend>::Framebuffer> {
+) -> (
+    Vec<<B as gfx_hal::Backend>::ImageView>,
+    Vec<<B as gfx_hal::Backend>::Framebuffer>,
+) {
     match backbuffer {
         Backbuffer::Images(images) => images
             .into_iter()
             .map(|image| build_framebuffer::<B>(device, render_pass, &image, format, extent))
-            .collect(),
-        Backbuffer::Framebuffer(framebuffer) => vec![framebuffer],
+            .unzip(),
+        Backbuffer::Framebuffer(framebuffer) => (vec![], vec![framebuffer]),
     }
 }
 
@@ -249,26 +252,31 @@ fn build_framebuffer<B: Backend>(
     image: &<B as gfx_hal::Backend>::Image,
     format: Format,
     extent: Extent,
-) -> <B as gfx_hal::Backend>::Framebuffer {
-    let attachments = vec![
-        device
-            .create_image_view(
-                image,
-                ViewKind::D2,
-                format,
-                Swizzle::NO,
-                SubresourceRange {
-                    aspects: Aspects::COLOR,
-                    levels: 0..1,
-                    layers: 0..1,
-                },
-            )
-            .unwrap(),
-    ];
+) -> (
+    <B as gfx_hal::Backend>::ImageView,
+    <B as gfx_hal::Backend>::Framebuffer,
+) {
+    let image_view = device
+        .create_image_view(
+            image,
+            ViewKind::D2,
+            format,
+            Swizzle::NO,
+            SubresourceRange {
+                aspects: Aspects::COLOR,
+                levels: 0..1,
+                layers: 0..1,
+            },
+        )
+        .unwrap();
 
-    device
+    let attachments = vec![image_view];
+
+    let framebuffer = device
         .create_framebuffer(render_pass, attachments, extent)
-        .unwrap()
+        .unwrap();
+
+    (image_view, framebuffer)
 }
 
 fn build_render_pass<B: Backend>(
