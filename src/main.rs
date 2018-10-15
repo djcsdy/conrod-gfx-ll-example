@@ -142,7 +142,7 @@ fn main() {
         .open(&[(&graphics_queue_family, &[1.0])])
         .unwrap();
 
-    let (mut swapchain, mut backbuffer) = build_swapchain::<gfx_backend::Backend>(
+    let (mut swapchain, mut backbuffer, mut extent) = build_swapchain::<gfx_backend::Backend>(
         &*window.upgrade().unwrap(),
         &adapter.physical_device,
         &device,
@@ -194,7 +194,7 @@ fn main() {
             {
                 device.destroy_swapchain(swapchain);
 
-                let (new_swapchain, new_backbuffer) = build_swapchain::<gfx_backend::Backend>(
+                let (new_swapchain, new_backbuffer, new_extent) = build_swapchain::<gfx_backend::Backend>(
                     &*window.upgrade().unwrap(),
                     &adapter.physical_device,
                     &device,
@@ -205,6 +205,7 @@ fn main() {
 
                 swapchain = new_swapchain;
                 backbuffer = new_backbuffer;
+                extent = new_extent;
 
                 ui.needs_redraw();
             };
@@ -320,7 +321,7 @@ fn build_swapchain<B: Backend>(
     surface: &mut <B as gfx_hal::Backend>::Surface,
     surface_format: Format,
     present_mode: PresentMode,
-) -> (<B as gfx_hal::Backend>::Swapchain, Backbuffer<B>) {
+) -> (<B as gfx_hal::Backend>::Swapchain, Backbuffer<B>, Extent2D) {
     let (capabilities, _, _) = surface.compatibility(physical_device);
 
     let extent = match capabilities.current_extent {
@@ -353,5 +354,7 @@ fn build_swapchain<B: Backend>(
         .with_image_usage(Usage::TRANSFER_DST)
         .with_mode(present_mode);
 
-    device.create_swapchain(surface, config, None)
+    let (swapchain, backbuffer) = device.create_swapchain(surface, config, None);
+    
+    (swapchain, backbuffer, extent)
 }
